@@ -1,0 +1,241 @@
+// Prompt 1
+#include <iostream>
+#include <string>
+#include <cctype>
+
+using namespace std;
+
+// Function to correct the sentence
+string correctSentence(string sentence) {
+    string result;
+    bool inSpace = false;  // Flag to track consecutive spaces
+
+    // Iterate through each character in the sentence
+    for (size_t i = 0; i < sentence.length(); i++) {
+        char ch = sentence[i];
+
+        // Handle spaces
+        if (isspace(ch)) {
+            if (!inSpace) {
+                result += " ";  // Add a single space
+                inSpace = true;  // Flag to mark that we've added a space
+            }
+        } else {
+            // Reset inSpace flag if a non-space character is found
+            inSpace = false;
+
+            // If it's the start of the sentence, capitalize the first letter
+            if (result.empty()) {
+                result += toupper(ch);
+            } else {
+                result += tolower(ch);
+            }
+        }
+    }
+
+    // Ensure the sentence ends with a period
+    if (!result.empty() && result.back() != '.') {
+        result += ".";
+    }
+
+    return result;
+}
+
+int main() {
+    string sentence;
+
+    // Read the sentence from the user
+    cout << "Enter a sentence (up to 100 characters): ";
+    getline(cin, sentence);
+
+    // Check if the sentence is too long
+    if (sentence.length() > 100) {
+        cout << "Error: Sentence exceeds 100 characters." << endl;
+    } else {
+        // Correct and output the sentence
+        string corrected = correctSentence(sentence);
+        cout << "Corrected sentence: " << corrected << endl;
+    }
+
+    return 0;
+}
+
+// Prompt 2
+#include <iostream>
+#include <string>
+#include <cctype>
+#include <sstream>
+
+using namespace std;
+
+// Function to replace four-letter words with "love" or "Love"
+string replaceFourLetterWords(string sentence) {
+    string result;
+    string word;
+    stringstream ss(sentence);  // Use stringstream to process each word
+
+    while (ss >> word) {  // Extract each word from the sentence
+        // Check if the word has exactly four letters
+        if (word.length() == 4 && isalpha(word[0])) {
+            // If the first letter is uppercase, replace with "Love"
+            if (isupper(word[0])) {
+                result += "Love";
+            } else {
+                result += "love";
+            }
+        } else {
+            // If not a four-letter word, add the original word
+            result += word;
+        }
+
+        result += " ";  // Add a space after each word
+    }
+
+    // Remove the trailing space, if present
+    if (!result.empty()) {
+        result.pop_back();
+    }
+
+    return result;
+}
+
+int main() {
+    string sentence;
+
+    // Read the sentence from the user
+    cout << "Enter a sentence: ";
+    getline(cin, sentence);
+
+    // Process and output the sentence with the replaced four-letter words
+    string correctedSentence = replaceFourLetterWords(sentence);
+    cout << "Processed sentence: " << correctedSentence << endl;
+
+    return 0;
+}
+
+// Prompt 3
+#include <iostream>
+#include <fstream>
+#include <vector>
+
+using namespace std;
+
+// Function to merge the numbers from two input files and write them to the output file
+void mergeFiles(ifstream &file1, ifstream &file2, ofstream &file3) {
+    int num1, num2;
+    bool file1_end = false, file2_end = false;
+
+    // Read the first number from each file (if possible)
+    file1_end = !(file1 >> num1);
+    file2_end = !(file2 >> num2);
+
+    // While neither of the files is fully read
+    while (!file1_end || !file2_end) {
+        // Compare the numbers and write the smaller one to file3
+        if (!file1_end && (file2_end || num1 <= num2)) {
+            file3 << num1 << " ";
+            file1_end = !(file1 >> num1);  // Read next number from file1
+        } else if (!file2_end && (file1_end || num2 < num1)) {
+            file3 << num2 << " ";
+            file2_end = !(file2 >> num2);  // Read next number from file2
+        }
+    }
+}
+
+int main() {
+    // Open the input and output files
+    ifstream file1("file1.txt");
+    ifstream file2("file2.txt");
+    ofstream file3("file3.txt");
+
+    // Check if the files opened successfully
+    if (!file1.is_open() || !file2.is_open() || !file3.is_open()) {
+        cout << "Error opening files." << endl;
+        return 1;
+    }
+
+    // Merge the files and write to the output file
+    mergeFiles(file1, file2, file3);
+
+    // Close all files
+    file1.close();
+    file2.close();
+    file3.close();
+
+    cout << "Files merged successfully into file3.txt." << endl;
+
+    return 0;
+}
+
+// Prompt 4
+#include <iostream>
+#include <fstream>
+#include <string>
+#include <vector>
+
+using namespace std;
+
+// Function to load answers from the file into a vector
+vector<string> loadAnswers(const string &filename) {
+    vector<string> answers;
+    string line;
+    ifstream file(filename);
+
+    // Check if the file opened successfully
+    if (!file.is_open()) {
+        cerr << "Error opening file: " << filename << endl;
+        exit(1);  // Exit the program if the file cannot be opened
+    }
+
+    // Read the file line by line and store each answer in the vector
+    while (getline(file, line)) {
+        answers.push_back(line);
+    }
+
+    // Close the file
+    file.close();
+
+    return answers;
+}
+
+int main() {
+    string filename = "answers.txt";  // Name of the file with answers
+    vector<string> answers = loadAnswers(filename);  // Load answers into a vector
+    size_t answerIndex = 0;  // To keep track of the current answer
+
+    string question;
+    char exitChoice;
+
+    cout << "Welcome! Ask me anything, and I will provide an answer." << endl;
+    cout << "Type 'exit' to quit." << endl;
+
+    // Loop to continue asking questions until the user chooses to exit
+    while (true) {
+        // Get the user's question (we don't actually use it)
+        cout << "Your question: ";
+        getline(cin, question);
+
+        // Provide the answer from the file (cycle through answers)
+        cout << "Answer: " << answers[answerIndex] << endl;
+
+        // Move to the next answer
+        answerIndex++;
+
+        // If we've reached the end of the answers, restart from the beginning
+        if (answerIndex >= answers.size()) {
+            answerIndex = 0;  // Reset to the first answer
+        }
+
+        // Ask if the user wants to continue or exit
+        cout << "Do you want to ask another question? (y/n): ";
+        cin >> exitChoice;
+        cin.ignore();  // To clear the newline character from the buffer
+
+        if (exitChoice == 'n' || exitChoice == 'N') {
+            cout << "Goodbye!" << endl;
+            break;  // Exit the loop if the user chooses 'n'
+        }
+    }
+
+    return 0;
+}
